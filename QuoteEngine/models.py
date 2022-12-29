@@ -18,6 +18,7 @@ import random
 from string import whitespace
 
 from .constants import QUOTE_AUTHOR_SEPARATOR
+from .exceptions import InvalidFileException
 
 
 class QuoteModel:
@@ -113,10 +114,10 @@ class CSVIngestor(IngestorInterface):
                     quotes.append(QuoteModel(row['body'], row['author']))
         except KeyError:
             logging.error('Csv file has wrong header names')
-            raise
+            raise InvalidFileException('Csv file {path} has invalid content')
         except FileNotFoundError:
             logging.error(f'Cannot open file {path}')
-            raise
+            raise FileNotFoundError(f'Cannot open file {path}')
         return quotes
 
 
@@ -152,10 +153,10 @@ class PdfIngestor(IngestorInterface):
                         )
         except FileNotFoundError:
             logging.error(f'Cannot open file {path}')
-            raise
+            raise FileNotFoundError(f'Cannot open file {path}')
         except IndexError:
             logging.error(f'Pdf file {path} has wrongly built data.')
-            raise
+            raise InvalidFileException(f'Pdf file {path} has invalid content')
         file_ref.close()
         os.remove(tmp)
         return quotes
@@ -182,17 +183,20 @@ class DocxIngestor(IngestorInterface):
             doc = Document(path)
         except docx.opc.exceptions.PackageNotFoundError:
             logging.error(f'Cannot open file {path}')
-            raise
-
-        for el in doc.paragraphs:
-            if el.text != "":
-                info_line = el.text.split(QUOTE_AUTHOR_SEPARATOR)
-                if len(info_line) < 2:
+            raise FileNotFoundError(f'Cannot open file {path}')
+        try:
+            for el in doc.paragraphs:
+                if el.text != "":
+                    info_line = el.text.split(QUOTE_AUTHOR_SEPARATOR)
+                    if len(info_line) < 2:
                         continue
-                quotes.append(
-                    QuoteModel(info_line[0].strip(whitespace + '"'), info_line[1].strip(whitespace + '"'))
-                )
-        return quotes
+                    quotes.append(
+                        QuoteModel(info_line[0].strip(whitespace + '"'), info_line[1].strip(whitespace + '"'))
+                    )
+            return quotes
+        except IndexError:
+            logging.error(f'Docx file {path} has wrongly built data.')
+            raise InvalidFileException(f'Docx file {path} has invalid content')
 
 
 class TextIngestor(IngestorInterface):
@@ -223,8 +227,8 @@ class TextIngestor(IngestorInterface):
                     )
         except FileNotFoundError:
             logging.error(f'Cannot open file {path}')
-            raise
+            raise FileNotFoundError(f'Cannot open file {path}')
         except IndexError:
             logging.error(f'Txt file {path} has wrongly built data.')
-            raise
+            raise InvalidFileException(f'Txt file {path} has invalid content')
         return quotes

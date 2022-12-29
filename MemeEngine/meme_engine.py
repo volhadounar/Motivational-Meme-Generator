@@ -41,5 +41,5 @@ class MemeEngine:
                 image.convert('RGB').save(new_file_name)
         except FileNotFoundError:
             logging.error(f'Cannot open file {new_file_name}')
-            raise
+            raise FileNotFoundError(f'Cannot open file {new_file_name}')
         return new_file_name

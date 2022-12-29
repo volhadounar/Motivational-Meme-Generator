@@ -16,7 +16,6 @@ def create_app(config_filename: str = __name__) -> Flask:
 
 app = create_app()
 
-
 meme = MemeEngine(IMAGE_DESTINATION_PATH)
 
 def setup():
@@ -55,8 +54,11 @@ def meme_post():
     image_url = request.form['image_url']
     body = request.form['body']
     author = request.form['author']
-    image = io.BytesIO(requests.get(image_url).content)
-    path = meme.make_meme(image, body, author)
+    try:
+        image = io.BytesIO(requests.get(image_url).content)
+        path = meme.make_meme(image, body, author)
+    except requests.exceptions.ConnectionError:
+        return render_template('meme_error.html')
     return render_template('meme.html', path=path)
 
 

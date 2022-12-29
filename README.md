@@ -41,8 +41,9 @@ The following types are supported: .txt, .pdf, .docx, .csv
 A quote contains a body and an author: "This is a quote body" - Author
 
 Module .\QuoteEngine\models.py implements IngestorInterface - abstract base class with two methods:
-    def can_ingest(cls, path: str) -> bool, 
-    def parse(cls, path: str) -> List[QuoteModel]
+    ``` def can_ingest(cls, path: str) -> bool, 
+        def parse(cls, path: str) -> List[QuoteModel]
+    ```
 This module implements stratagy objects that realize the IngestorInterface for each file type, so each stratagy object knows
 how to parse the text and turn it into object QuoteModel.
 
@@ -51,7 +52,8 @@ If this is the case, you can install it using the open source XpdfReader utility
 
 The Meme Engine Module (.\MemeEngine\meme_engine.py) is responsible for manipulating and drawing text onto images. 
 It implements MemeEngine class that contains a method:
-    def make_meme(self, img_path, text, author, width=500) -> str
+    ```def make_meme(self, img_path, text, author, width=500) -> str
+    ```
 This method is responsible for:
 1. Loading an image using Pillow(PIL).
 2. Resizing the image so that the width is at most 500px and the height is scaled proportionally.
